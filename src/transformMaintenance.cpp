@@ -56,7 +56,8 @@ ros::Publisher *pubLaserOdometry2Pointer = NULL;
 tf::TransformBroadcaster *tfBroadcaster2Pointer = NULL;
 nav_msgs::Odometry laserOdometry2;
 tf::StampedTransform laserOdometryTrans2;
-
+//写入路径
+FILE *fp;
 void transformAssociateToMap()
 {
   float x1 = cos(transformSum[1]) * (transformBefMapped[3] - transformSum[3]) 
@@ -159,7 +160,8 @@ void laserOdometryHandler(const nav_msgs::Odometry::ConstPtr& laserOdometry)
   transformSum[5] = laserOdometry->pose.pose.position.z;
 
   transformAssociateToMap();
-
+  ROS_INFO("%f %f %f\n",transformMapped[3],transformMapped[4],transformMapped[5]);
+  fprintf(fp,"%f %f %f\n",transformMapped[3],transformMapped[4],transformMapped[5]);
   geoQuat = tf::createQuaternionMsgFromRollPitchYaw
             (transformMapped[2], -transformMapped[0], -transformMapped[1]);
 
@@ -204,6 +206,7 @@ void odomAftMappedHandler(const nav_msgs::Odometry::ConstPtr& odomAftMapped)
 
 int main(int argc, char** argv)
 {
+  fp = fopen("/root/orgpose.txt","w");
   ros::init(argc, argv, "transformMaintenance");
   ros::NodeHandle nh;
 
@@ -224,6 +227,6 @@ int main(int argc, char** argv)
   laserOdometryTrans2.child_frame_id_ = "/camera";
 
   ros::spin();
-
+  fclose(fp);
   return 0;
 }
