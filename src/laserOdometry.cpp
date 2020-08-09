@@ -97,7 +97,7 @@ float imuRollStart = 0, imuPitchStart = 0, imuYawStart = 0;
 float imuRollLast = 0, imuPitchLast = 0, imuYawLast = 0;
 float imuShiftFromStartX = 0, imuShiftFromStartY = 0, imuShiftFromStartZ = 0;
 float imuVeloFromStartX = 0, imuVeloFromStartY = 0, imuVeloFromStartZ = 0;
-
+int _count = 0;
 void TransformToStart(PointType const * const pi, PointType * const po)
 {
   float s = 10 * (pi->intensity - int(pi->intensity));
@@ -854,7 +854,9 @@ int main(int argc, char** argv)
       transformSum[3] = tx;
       transformSum[4] = ty;
       transformSum[5] = tz;
-
+//      ROS_INFO("%f %f %f %f %f %f", transformSum[0], transformSum[1], transformSum[2], transformSum[3], transformSum[4], transformSum[5]);
+      ROS_INFO("OdometryModel:%d %f %f %f",++_count, transformSum[3], transformSum[4], transformSum[5]);
+      ROS_INFO("OdometryFrame:%f %f %f", transform[3], transform[4], transform[5]);
       geometry_msgs::Quaternion geoQuat = tf::createQuaternionMsgFromRollPitchYaw(rz, -rx, -ry);
 
       laserOdometry.header.stamp = ros::Time().fromSec(timeSurfPointsLessFlat);

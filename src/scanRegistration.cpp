@@ -51,10 +51,10 @@
 using std::sin;
 using std::cos;
 using std::atan2;
-
+int _count = 0;
 const double scanPeriod = 0.1;
 
-const int systemDelay = 20;
+const int systemDelay = 0;
 int systemInitCount = 0;
 bool systemInited = false;
 
@@ -106,7 +106,34 @@ ros::Publisher pubCornerPointsLessSharp;
 ros::Publisher pubSurfPointsFlat;
 ros::Publisher pubSurfPointsLessFlat;
 ros::Publisher pubImuTrans;
+template <typename PointT>
+void removeClosedPointCloud(const pcl::PointCloud<PointT> &cloud_in,
+                            pcl::PointCloud<PointT> &cloud_out, float thres)
+{
+  if (&cloud_in != &cloud_out)
+  {
+    cloud_out.header = cloud_in.header;
+    cloud_out.points.resize(cloud_in.points.size());
+  }
 
+  size_t j = 0;
+
+  for (size_t i = 0; i < cloud_in.points.size(); ++i)
+  {
+    if (cloud_in.points[i].x * cloud_in.points[i].x + cloud_in.points[i].y * cloud_in.points[i].y + cloud_in.points[i].z * cloud_in.points[i].z < thres * thres)
+      continue;
+    cloud_out.points[j] = cloud_in.points[i];
+    j++;
+  }
+  if (j != cloud_in.points.size())
+  {
+    cloud_out.points.resize(j);
+  }
+
+  cloud_out.height = 1;
+  cloud_out.width = static_cast<uint32_t>(j);
+  cloud_out.is_dense = true;
+}
 void ShiftToStartIMU(float pointTime)
 {
   imuShiftFromStartXCur = imuShiftXCur - imuShiftXStart - imuVeloXStart * pointTime;
@@ -228,6 +255,8 @@ void laserCloudHandler(const sensor_msgs::PointCloud2ConstPtr& laserCloudMsg)
   pcl::fromROSMsg(*laserCloudMsg, laserCloudIn);
   std::vector<int> indices;
   pcl::removeNaNFromPointCloud(laserCloudIn, laserCloudIn, indices);
+//  removeClosedPointCloud(laserCloudIn, laserCloudIn, 5);
+
   int cloudSize = laserCloudIn.points.size();
   float startOri = -atan2(laserCloudIn.points[0].y, laserCloudIn.points[0].x);
   float endOri = -atan2(laserCloudIn.points[cloudSize - 1].y,
@@ -447,7 +476,7 @@ void laserCloudHandler(const sensor_msgs::PointCloud2ConstPtr& laserCloudMsg)
     scanEndInd[i] = sum - 5;
     scanStartInd[i + 1] = sum + 5;
   }*/
-
+//
   for (int i = 5; i < cloudSize - 6; i++) {
     float diffX = laserCloud->points[i + 1].x - laserCloud->points[i].x;
     float diffY = laserCloud->points[i + 1].y - laserCloud->points[i].y;
@@ -638,7 +667,7 @@ void laserCloudHandler(const sensor_msgs::PointCloud2ConstPtr& laserCloudMsg)
 
     surfPointsLessFlat += surfPointsLessFlatScanDS;
   }
-
+  ROS_INFO("Scanreg:%d", ++_count);
   sensor_msgs::PointCloud2 laserCloudOutMsg;
   pcl::toROSMsg(*laserCloud, laserCloudOutMsg);
   laserCloudOutMsg.header.stamp = laserCloudMsg->header.stamp;

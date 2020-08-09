@@ -160,7 +160,8 @@ void laserOdometryHandler(const nav_msgs::Odometry::ConstPtr& laserOdometry)
   transformSum[5] = laserOdometry->pose.pose.position.z;
 
   transformAssociateToMap();
-  ROS_INFO("%f %f %f\n",transformMapped[3],transformMapped[4],transformMapped[5]);
+  ROS_INFO("Transform:%f %f %f",transformMapped[3],transformMapped[4],transformMapped[5]);
+//  ROS_INFO("%d %f %f %f",++_count, transformSum[3], transformSum[4], transformSum[5]);
   fprintf(fp,"%f %f %f\n",transformMapped[3],transformMapped[4],transformMapped[5]);
   geoQuat = tf::createQuaternionMsgFromRollPitchYaw
             (transformMapped[2], -transformMapped[0], -transformMapped[1]);

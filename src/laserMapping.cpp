@@ -1070,7 +1070,7 @@ int main(int argc, char** argv)
 
         geometry_msgs::Quaternion geoQuat = tf::createQuaternionMsgFromRollPitchYaw
                                   (transformAftMapped[2], -transformAftMapped[0], -transformAftMapped[1]);
-
+        ROS_INFO("Mapping:%f %f %f",transformAftMapped[3],transformAftMapped[4],transformAftMapped[5]);
         odomAftMapped.header.stamp = ros::Time().fromSec(timeLaserOdometry);
         odomAftMapped.pose.pose.orientation.x = -geoQuat.y;
         odomAftMapped.pose.pose.orientation.y = -geoQuat.z;
